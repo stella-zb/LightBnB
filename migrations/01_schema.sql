@@ -39,7 +39,7 @@ CREATE TABLE reservations (
 
 CREATE TABLE property_reviews (
   id SERIAL PRIMARY KEY NOT NULL,
-  guess_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  guest_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,
   reservation_id INTEGER REFERENCES reservations(id) ON DELETE CASCADE,
   rating SMALLINT NOT NULL DEFAULT 0,
@@ -56,7 +56,7 @@ CREATE TABLE rates (
 
 CREATE TABLE guess_reviews (
   id SERIAL PRIMARY KEY NOT NULL,
-  guess_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  guest_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   reservation_id INTEGER REFERENCES reservations(id) ON DELETE CASCADE,
   rating SMALLINT NOT NULL DEFAULT 0,
