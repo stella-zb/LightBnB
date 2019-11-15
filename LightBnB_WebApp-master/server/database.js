@@ -17,17 +17,35 @@ const pool = new Pool({
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function(email) {
-  let user;
-  for (const userId in users) {
-    user = users[userId];
-    if (user.email.toLowerCase() === email.toLowerCase()) {
-      break;
-    } else {
-      user = null;
+  return new Promise(
+    (resolve, reject) => {
+      pool.query(`SELECT * FROM users WHERE email = $1`, [email])
+      .then(res => {
+        if (!res.rows.length) return resolve(null);
+        resolve(res.rows[0]);
+      })
+      .catch(err => {
+        reject(err);
+      })
     }
-  }
-  return Promise.resolve(user);
+  )
+
+  // let user;
+  // for (const userId in users) {
+  //   user = users[userId];
+  //   if (user.email.toLowerCase() === email.toLowerCase()) {
+  //     break;
+  //   } else {
+  //     user = null;
+  //   }
+  // }
+  // return Promise.resolve(user);
 }
+
+// TEST CODE
+// getUserWithEmail('abc@gmail.com')
+// .then(res => {console.log(res)})
+// .catch(err => {console.log(err)});
 exports.getUserWithEmail = getUserWithEmail;
 
 /**
@@ -36,7 +54,20 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return Promise.resolve(users[id]);
+  return new Promise(
+    (resolve, reject) => {
+      pool.query(`SELECT * FROM users WHERE id = $1`, [id]) 
+      .then(res => {
+        if (!res.rows.length) return resolve(null);
+        resolve(res.rows[0]);
+      })
+      .catch(err => {
+        reject(err);
+      })
+    }
+  )
+  
+  // return Promise.resolve(users[id]);
 }
 exports.getUserWithId = getUserWithId;
 
@@ -46,11 +77,26 @@ exports.getUserWithId = getUserWithId;
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
+
 const addUser =  function(user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+  return pool.query(`
+    INSERT INTO users (name, email, password) 
+    SELECT $1, $2::varchar, $3
+    WHERE NOT EXISTS (SELECT * FROM users WHERE email = $2::varchar)
+    RETURNING *;
+  `, [user.name, user.email, user.password])
+  .then(res => {
+    if (res.rows) {
+      return res.rows[0];
+    } else {
+      return null;
+    }
+  })
+  
+  // const userId = Object.keys(users).length + 1;
+  // user.id = userId;
+  // users[userId] = user;
+  // return Promise.resolve(user);
 }
 exports.addUser = addUser;
 
@@ -80,11 +126,11 @@ const getAllProperties = function(options, limit = 10) {
     Limit $1
   `, [limit])
   .then(res => res.rows);
-  const limitedProperties = {};
-  for (let i = 1; i <= limit; i++) {
-    limitedProperties[i] = properties[i];
-  }
-  return Promise.resolve(limitedProperties);
+  // const limitedProperties = {};
+  // for (let i = 1; i <= limit; i++) {
+  //   limitedProperties[i] = properties[i];
+  // }
+  // return Promise.resolve(limitedProperties);
 }
 exports.getAllProperties = getAllProperties;
 
