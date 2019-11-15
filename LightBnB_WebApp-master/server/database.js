@@ -79,6 +79,11 @@ exports.getUserWithId = getUserWithId;
  */
 
 const addUser =  function(user) {
+  // return pool.query(`
+  //   INSERT INTO users (name, email, password)
+  //   VALUES ($1, $2, $3)
+  //   RETURNING *;
+  // `, [user.name, user.email, user.password])
   return pool.query(`
     INSERT INTO users (name, email, password) 
     SELECT $1, $2::varchar, $3
