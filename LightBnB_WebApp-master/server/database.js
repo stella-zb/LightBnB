@@ -1,10 +1,8 @@
-const properties = require('./json/properties.json');
-const users = require('./json/users.json');
 const { Pool } = require('pg');
 
 const pool = new Pool({
   user: 'vagrant',
-  password: '123',
+  password: 'password',
   host: 'localhost',
   database: 'lightbnb'
 });
@@ -16,7 +14,9 @@ const pool = new Pool({
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithEmail = function(email) {
+module.exports = {
+
+getUserWithEmail: (email) => {
   return pool.query(`
     SELECT * FROM users WHERE email = $1
   `, [email])
@@ -30,15 +30,14 @@ const getUserWithEmail = function(email) {
   .catch(err => {
     reject(err);
   })
-}
-exports.getUserWithEmail = getUserWithEmail;
+},
 
 /**
  * Get a single user from the database given their id.
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithId = function(id) {
+getUserWithId: (id) => {
   return pool.query(`
     SELECT * FROM users WHERE id = $1
   `, [id]) 
@@ -52,10 +51,7 @@ const getUserWithId = function(id) {
   .catch(err => {
     reject(err);
   })
-}
-exports.getUserWithId = getUserWithId;
-
-
+},
 
 /**
  * Add a new user to the database.
@@ -63,7 +59,7 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 
-const addUser =  function(user) {
+addUser: (user) => {
   return pool.query(`
     INSERT INTO users (name, email, password) 
     SELECT $1, $2::varchar, $3
@@ -77,8 +73,7 @@ const addUser =  function(user) {
       return null;
     }
   })
-}
-exports.addUser = addUser;
+},
 
 /// Reservations
 
@@ -87,7 +82,7 @@ exports.addUser = addUser;
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = function(guest_id, limit = 10) {
+getAllReservations: (guest_id, limit = 10) => {
   return pool.query(`
     SELECT properties.*, reservations.*, AVG(rating) as average_rating
     FROM reservations
@@ -106,8 +101,7 @@ const getAllReservations = function(guest_id, limit = 10) {
       return null;
     }
   })
-}
-exports.getAllReservations = getAllReservations;
+},
 
 /// Properties
 
@@ -117,7 +111,7 @@ exports.getAllReservations = getAllReservations;
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
-const getAllProperties = function(options, limit = 10) {
+getAllProperties: (options, limit = 10) => {
 
   // 1
   const queryParams = [];
@@ -195,8 +189,7 @@ const getAllProperties = function(options, limit = 10) {
   // 6
   return pool.query(queryString, queryParams)
   .then(res => res.rows);
-}
-exports.getAllProperties = getAllProperties;
+},
 
 
 /**
@@ -204,7 +197,7 @@ exports.getAllProperties = getAllProperties;
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
-const addProperty = function(property) {
+addProperty: (property) => {
   return pool.query(`
     INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, street, city, province, post_code, country, parking_spaces, number_of_bathrooms, number_of_bedrooms) 
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
@@ -219,4 +212,5 @@ const addProperty = function(property) {
     }
   })
 }
-exports.addProperty = addProperty;
+
+}
